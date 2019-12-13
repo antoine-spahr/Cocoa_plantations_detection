@@ -1,0 +1,6 @@
+.DS_Store
+Code/__pycache__/*
+Code/junk/*
+Data/*
+Figures/ProcessingDiagram.drawio
+models/*.pickle
