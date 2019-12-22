@@ -15,6 +15,10 @@ from visualization import show_image
 
 def detection_rate(mask, pred):
     """
+    Compute the fraction of the polygon on mask present on the pred.
+    INPUT : mask (2D numpy array) -> the mask of ground truth
+            pred (2D numpy array) -> the mask of prediction
+    OUTPUT : rate [float] -> the detection rate
 
     """
     polygon_mask = (mask == 1).ravel()
@@ -63,6 +67,7 @@ mask_test_dist = compute_mask(polygons_rc_test_dist, meta_test_dist['width'], me
 
 # %% get the park polygon
 polygons_park = load_shapefile(path_shp+'Tai_boundaries/WDPA_Oct2019_protected_area_721-shapefile-polygons.shp', projection=pyproj.Proj(meta_test['crs']))
+polygons_park += load_shapefile(path_shp+'NZo/WDPA_Jan2020_protected_area_2293-shapefile-polygons.shp', projection=pyproj.Proj(meta_nearby['crs']))
 
 # ---------------------------------------------------------------------------------------------------------------
 # %% Load the fitted models

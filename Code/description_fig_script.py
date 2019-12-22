@@ -38,9 +38,11 @@ dist_bounds = rasterio.transform.array_bounds(meta_distant['height'], meta_dista
 # %% Load shapefile
 shp_path = '../Data/shapefiles/'
 polygons_Tai = load_shapefile(shp_path+'Tai_boundaries/WDPA_Oct2019_protected_area_721-shapefile-polygons.shp', projection=pyproj.Proj(meta_nearby['crs']))
+polygons_Nzo = load_shapefile(shp_path+'NZo/WDPA_Jan2020_protected_area_2293-shapefile-polygons.shp', projection=pyproj.Proj(meta_nearby['crs']))
 polygons_train, _, _ = load_target_shp(shp_path+'labels/Tai/segmentation.shp', transform=meta_nearby['transform'], projection=pyproj.Proj(meta_nearby['crs']))
 polygons_test, _, _ = load_target_shp(shp_path+'labels/control/segmentation_control.shp', transform=meta_nearby['transform'], projection=pyproj.Proj(meta_nearby['crs']))
 polygons_test_dist, _, _ = load_target_shp(shp_path+'labels/distant/Segmentation_distant2.shp', transform=meta_distant['transform'], projection=pyproj.Proj(meta_distant['crs']))
+polygons_Tai += polygons_Nzo
 
 # %% plot images
 title_fs = 10
@@ -85,6 +87,8 @@ show_image(img_distant, meta_distant['transform'], ax=ax_dist, band_idx=[3,2,1])
 
 for p in polygons_test_dist:
     ax_dist.add_patch(matplotlib.patches.Polygon(p, **{'linewidth':0.75, 'facecolor':(0,0,0,0), 'edgecolor':test_color}))
+for p in polygons_Tai:
+    ax_dist.add_patch(matplotlib.patches.Polygon(p, **{'linewidth':1, 'facecolor':(0,0,0,0), 'edgecolor':'orange'}))
 
 # line between NW and distant
 ax_dist.add_artist(matplotlib.patches.ConnectionPatch(xyA=(dist_bounds[0],dist_bounds[1]), xyB=(dist_bounds[2],dist_bounds[1]), \
@@ -123,7 +127,7 @@ for i, ax in enumerate(axs):
 
 # legend
 handles = [matplotlib.lines.Line2D([0], [0], color=c, linewidth=2) for c in [park_color, train_color, test_color]]
-labels = ['Taï National Park boundaries', 'Training cocoa plantations', 'Testing cocoa plantations']
+labels = ["Taï National Park and N'Zo boundaries", "Training cocoa plantations", "Testing cocoa plantations"]
 lgd = fig.legend(handles=handles, labels=labels, loc='lower center', bbox_to_anchor=(0.5, 0.01), bbox_transform=fig.transFigure, ncol=4, fontsize=9)
 
 fig.savefig('../Figures/overview.png', dpi=100, bbox_extra_artists=(lgd,), bbox_inches='tight')

@@ -25,6 +25,11 @@ band, meta_whole = load_geotiff(path_geotiff+'2018_12_29_Tai_whole.tiff', window
 img_whole = contrast_adjust(band, (0.1,99.9))
 
 # %% -------------------------------------------------------------------------------------------------------------
+# get the park polygon
+polygons_park = load_shapefile(path_shp+'Tai_boundaries/WDPA_Oct2019_protected_area_721-shapefile-polygons.shp', projection=pyproj.Proj(meta_test['crs']))
+polygons_park += load_shapefile(path_shp+'NZo/WDPA_Jan2020_protected_area_2293-shapefile-polygons.shp', projection=pyproj.Proj(meta_nearby['crs']))
+
+# %% -------------------------------------------------------------------------------------------------------------
 # load part sample from large images
 h, w = 1000, 1000
 windows = [rasterio.windows.Window(1000, 2000, w, h), \
@@ -97,20 +102,25 @@ for i, (pred, meta) in enumerate(zip(preds, metas)):
 fig = plt.figure(figsize=(12,16))
 gs = plt.GridSpec(4, 3, wspace=0.2, hspace=0.2)
 title_fs = 11
+park_color = 'orange'
 pred_fc = 'crimson'
 pred_ec = None
 pred_alpha = 1
+offset_w = [9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
+offset_h = [5, 5, 5, 5, 5, 9, 5, 5, 5, 9]
 
 # overview img
 ax_overview = fig.add_subplot(gs[0:2,0])
 ax_overview.set_title('Taï National Park', fontsize=title_fs)
 show_image(img_whole, meta_whole['transform'], ax=ax_overview, band_idx=[2,1,0])
+for p in polygons_park:
+    ax_overview.add_patch(matplotlib.patches.Polygon(p, **{'linewidth':1, 'facecolor':(0,0,0,0), 'edgecolor':'orange'}))
 for i, bound in enumerate(bounds):
     ax_overview.add_patch(matplotlib.patches.Rectangle(bound[0:2], \
                                                        width=np.abs(bound[0] - bound[2]), \
                                                        height=np.abs(bound[1] - bound[3]), \
                                                        linewidth=1, facecolor=(0,0,0,0), edgecolor='darkgray'))
-    ax_overview.text(bound[2]-6*w, bound[3]-6*h, str(i+1), fontsize=9, color='crimson', fontweight='bold')
+    ax_overview.text(bound[2]-offset_w[i]*w, bound[3]-offset_h[i]*h, str(i+1), fontsize=9, color='crimson', fontweight='bold')
 
 # create axes for predictions
 axs = []
@@ -121,6 +131,8 @@ for i in range(3*4):
 for i, (im, meta, poly, ax) in enumerate(zip(img_adj, metas, pred_poly, axs)):
     ax.set_title(f'Prediction {i+1}', fontsize=title_fs)
     show_image(im, meta['transform'], ax=ax, band_idx=[3,2,1])
+    for p in polygons_park:
+        ax.add_patch(matplotlib.patches.Polygon(p, **{'linewidth':1, 'facecolor':(0,0,0,0), 'edgecolor':park_color}))
     for p in poly:
         ax.add_patch(matplotlib.patches.Polygon(p, **{'linewidth':1, 'facecolor':pred_fc, 'edgecolor':pred_ec, 'alpha':pred_alpha}))
 
@@ -135,9 +147,9 @@ for i, ax in enumerate([ax_overview]+axs):
     ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(human_format))
 
 # legend
-handles = [matplotlib.patches.Patch(linewidth=0.75, facecolor=pred_fc, edgecolor=pred_ec, alpha=pred_alpha)]
-labels = ['KNN Prediction']
-lgd = fig.legend(handles=handles, labels=labels, loc='lower center', bbox_to_anchor=(0.5, 0.07), bbox_transform=fig.transFigure, ncol=1, fontsize=9)
+handles = [matplotlib.patches.Patch(linewidth=0.75, facecolor=pred_fc, edgecolor=pred_ec, alpha=pred_alpha), matplotlib.lines.Line2D([0], [0], color=park_color, linewidth=1)]
+labels = ['KNN Prediction', "Taï National Park and N'Zo boundaries"]
+lgd = fig.legend(handles=handles, labels=labels, loc='lower center', bbox_to_anchor=(0.5, 0.07), bbox_transform=fig.transFigure, ncol=2, fontsize=9)
 
 fig.savefig('../Figures/predictions.png', dpi=100, bbox_extra_artists=(lgd,), bbox_inches='tight')
 plt.show()
