@@ -4,3 +4,7 @@ Code/junk/*
 Data/*
 Figures/ProcessingDiagram.drawio
 models/*.pickle
+Report/*
+!Report/*.pdf
+!Report/*.tex
+!Report/*.bib

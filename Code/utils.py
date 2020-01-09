@@ -6,7 +6,6 @@ import fiona
 import pyproj
 import glob
 
-# Geotiff converter
 def to_single_geotiff(path_in, path_out):
     """ Convert a folder of multiple geotiff images as a single multiband geotiff
         INPUT : path_in (str) -> path to the input folder as (path_to_folder/../*.tiff)
@@ -14,37 +13,17 @@ def to_single_geotiff(path_in, path_out):
         OUTPUT : None
     """
     file_path = [f for f in sorted(glob.glob(path_in))]
-    #vals = [s[-7:-5] for s in file_path]
-    #idx = sorted(range(len(vals)), key=vals.__getitem__)
-
     # Read metadata of first file
     with rasterio.open(file_path[0]) as src0:
         meta = src0.meta
-
     # Update meta to reflect the number of layers
     meta.update(count=len(file_path))
-
     # Read each layer and write it to stack
     with rasterio.open(path_out, 'w', **meta) as dst:
         for id, path in enumerate(file_path, start=1):
             with rasterio.open(path) as src1:
                 dst.write_band(id, src1.read(1))
-    # bands = []
-    # count = len(idx)
-    # for i in idx:
-    #     with rasterio.open(file_path[i]) as f:
-    #         b = [f.read(b+1) for b in range(f.count)]
-    #         meta = f.meta
-    #
-    #     bands += b
-    #
-    # out = np.stack(bands, axis=0)
-    # meta['count'] = count
-    #
-    # with rasterio.open(path_out, 'w', **meta) as f:
-    #     f.write(out)
 
-# Geotiff reader
 def load_geotiff(path, window=None, in_range='uint16', out_range=(0,1)):
     """ Load the geotiff as a list of numpy array.
         INPUT : path (str) -> the path to the geotiff
@@ -65,7 +44,6 @@ def load_geotiff(path, window=None, in_range='uint16', out_range=(0,1)):
 
     return band, meta
 
-# shapefile reader
 def load_shapefile(path, projection):
     """ Load the shapefile as a list of numpy array of coordinates
         INPUT : path (str) -> the path to the shapefile
