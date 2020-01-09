@@ -1,7 +1,6 @@
-# Detecting cocoa plantation in Ivory coast
+# Detecting Cocoa Plantation in Ivory coast
 
 In the context of the _Image Processing for Earth Observation_ EPFL course (ENV-540)
-
 ___
 
 ## Goal
